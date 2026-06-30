@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IntelliBean — Coffee Finder (Demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<style>
+  :root{
+    --pine:#1C3A30; --paper:#FBF8F1; --line:#E4DCC9; --copper:#B5683C; --copper-lt:#D98E5E;
+    --espresso:#2A1A0F; --charcoal:#33312F; --ink:#2F3A33; --muted:#8C8472; --ivory:#F7F3EA;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ font-family:'Jost',sans-serif; color:var(--ink); background:var(--paper);
+        background-image:radial-gradient(140% 60% at 50% -10%, #FFF6E8, var(--paper) 60%);
+        min-height:100vh; }
+  .serif{ font-family:'Cormorant Garamond',serif; }
+  .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+
+  /* ===== shell ===== */
+  .nav{ display:flex; align-items:center; justify-content:space-between; padding:18px 26px; max-width:1040px; margin:0 auto; }
+  .wordmark{ display:flex; align-items:center; gap:9px; }
+  .seal{ width:30px; height:30px; border-radius:50%; border:1px solid var(--copper); display:flex; align-items:center; justify-content:center; }
+  .seal i{ color:var(--copper); font-size:15px; }
+  .wm-text{ font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:600; color:var(--pine); }
+  .wm-text b{ color:var(--copper); }
+  .profile-link{ display:flex; align-items:center; gap:7px; border:1px solid var(--line); border-radius:99px; padding:6px 13px 6px 7px; cursor:pointer; background:transparent; transition:border-color .2s ease; }
+  .profile-link:hover{ border-color:var(--copper); }
+  .profile-av{ width:22px; height:22px; border-radius:50%; background:var(--pine); display:flex; align-items:center; justify-content:center; }
+  .profile-av i{ color:var(--copper-lt); font-size:12px; }
+  .profile-txt{ font-size:12px; letter-spacing:.06em; color:var(--pine); font-weight:500; }
+
+  .app{ max-width:1040px; margin:0 auto; padding:8px 22px 60px; position:relative; }
+  .screen{ display:none; animation:fadein .5s ease; }
+  .screen.active{ display:block; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+  .kicker{ font-size:9px; letter-spacing:.3em; text-transform:uppercase; color:var(--copper); }
+  .field-label{ font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:var(--muted); display:block; }
+
+  /* ===== page 1 ===== */
+  .p1{ display:grid; grid-template-columns:1fr 1fr; gap:26px; align-items:stretch; max-width:940px; margin:10px auto 0; }
+  .hero{ background:var(--pine); border-radius:22px; padding:42px 34px; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; }
+  .hero:before{ content:""; position:absolute; inset:0; background:radial-gradient(120% 90% at 20% -10%, rgba(181,104,60,.34), transparent 62%); }
+  .hero-est{ position:relative; font-size:9px; letter-spacing:.3em; text-transform:uppercase; color:var(--copper-lt); margin:0 0 16px; }
+  .hero-title{ position:relative; font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:500; line-height:1.06; color:var(--ivory); margin:0 0 12px; }
+  .hero-title em{ font-style:italic; color:var(--copper-lt); }
+  .hero-rule{ position:relative; width:42px; height:1px; background:var(--copper); margin:16px 0; }
+  .hero-sub{ position:relative; font-size:13px; line-height:1.75; color:#BDCABF; font-weight:300; margin:0; }
+
+  .formcard{ background:#FFFDF9; border:1px solid var(--line); border-radius:22px; padding:32px 30px; display:flex; flex-direction:column; justify-content:center; }
+  .text-input{ width:100%; background:transparent; border:none; border-bottom:1px solid var(--line); padding:11px 2px; font-family:'Cormorant Garamond',serif; font-size:17px; color:var(--ink); outline:none; margin-bottom:22px; transition:border-color .2s ease; }
+  .text-input::placeholder{ color:#B7AE97; font-style:italic; }
+  .text-input:focus{ border-bottom-color:var(--copper); }
+
+  .opts{ display:flex; flex-direction:column; gap:10px; margin:6px 0 22px; }
+  .opt{ display:flex; align-items:center; gap:13px; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:13px 15px; cursor:pointer;
+        transition:border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease; }
+  .opt:hover{ border-color:var(--copper); background:#FCF7EF; transform:translateX(4px); box-shadow:0 3px 10px rgba(181,104,60,.08); }
+  .opt.on{ border-color:var(--copper); background:#FCF7EF; box-shadow:0 0 0 1px var(--copper) inset; }
+  .pick{ flex:0 0 auto; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+  .pick .bean-fill{ display:none; }
+  .opt:hover .pick .bean-out, .opt.on .pick .bean-out{ display:none; }
+  .opt:hover .pick .bean-fill, .opt.on .pick .bean-fill{ display:block; }
+  .opt-ic{ width:34px; height:34px; border-radius:10px; background:var(--ivory); display:flex; align-items:center; justify-content:center; flex:0 0 auto; transition:background .2s ease; }
+  .opt.on .opt-ic{ background:var(--pine); }
+  .opt-ic i{ color:var(--copper); font-size:16px; }
+  .opt.on .opt-ic i{ color:var(--copper-lt); }
+  .opt-t{ font-family:'Cormorant Garamond',serif; font-weight:600; color:var(--pine); margin:0; line-height:1.1; font-size:15px; }
+  .opt-d{ color:var(--muted); margin:1px 0 0; font-size:11px; }
+
+  /* brew button (page 1) */
+  .brewbtn{ position:relative; overflow:hidden; width:100%; background:transparent; color:var(--espresso);
+    border:1.7px solid var(--copper); border-radius:16px; font-family:'Jost'; cursor:pointer; padding:15px 22px;
+    display:flex; align-items:center; justify-content:center; gap:18px;
+    transition:border-color .3s ease, transform .14s ease; }
+  .brewbtn:hover{ border-color:var(--charcoal); }
+  .brewbtn:active{ transform:scale(.985); }
+  .brewbtn .lbl{ position:relative; z-index:3; text-align:left; font-weight:500; letter-spacing:.18em; text-transform:uppercase; line-height:1.35; color:var(--espresso); font-size:14px; }
+  .bmug{ position:relative; z-index:3; color:var(--espresso); flex:0 0 auto; }
+  .bmug .mug-liquid{ transition:y .6s cubic-bezier(.4,0,.2,1); }
+  .brewbtn:hover .bmug .mug-liquid{ y:7px; }
+  .bmug .st{ opacity:0; transform-origin:center; }
+  .brewbtn:hover .bmug .s1{ animation:rise 1.5s ease-in-out infinite; }
+  .brewbtn:hover .bmug .s2{ animation:rise 1.5s ease-in-out .45s infinite; }
+  @keyframes rise{ 0%{opacity:0;transform:translateY(3px) scaleY(.5)} 40%{opacity:.9} 100%{opacity:0;transform:translateY(-8px) scaleY(1.3)} }
+  .drop{ position:absolute; border-radius:50%; background:rgba(181,104,60,.22); transform:scale(0); z-index:2; pointer-events:none; animation:drip .6s ease-out forwards; }
+  @keyframes drip{ to{ transform:scale(2.6); opacity:0; } }
+
+  /* ===== page 2 ===== */
+  .center-col{ max-width:540px; margin:14px auto 0; position:relative; }
+  .prog-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+  .prog-step{ font-family:'Cormorant Garamond',serif; color:var(--pine); font-size:17px; }
+  .prog-step b{ color:var(--copper); font-weight:600; }
+  .prog-pct{ font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+  .prog-track{ height:3px; background:var(--line); border-radius:99px; overflow:hidden; margin-bottom:22px; }
+  .prog-fill{ height:3px; background:var(--copper); border-radius:99px; width:20%; transition:width .6s ease; }
+
+  .scenario{ background:var(--pine); border-radius:18px; position:relative; overflow:hidden; padding:24px 22px; margin-bottom:18px; }
+  .scenario:before{ content:""; position:absolute; inset:0; background:radial-gradient(110% 80% at 85% -10%, rgba(181,104,60,.30), transparent 60%); }
+  .sc-tag{ position:relative; display:inline-flex; align-items:center; gap:6px; font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:var(--copper-lt); margin-bottom:10px; }
+  .sc-q{ position:relative; font-family:'Cormorant Garamond',serif; color:var(--ivory); font-weight:500; font-size:22px; line-height:1.3; margin:0; }
+
+  .answers{ display:flex; flex-direction:column; gap:9px; margin-bottom:18px; }
+  .ans{ display:flex; align-items:center; gap:12px; background:var(--paper); border:1px solid var(--line); border-radius:13px; cursor:pointer; padding:14px 15px;
+        transition:border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease; }
+  .ans:hover{ border-color:var(--copper); background:#FCF7EF; transform:translateX(4px); box-shadow:0 3px 10px rgba(181,104,60,.08); }
+  .ans.on{ border-color:var(--copper); background:#FCF7EF; box-shadow:0 0 0 1px var(--copper) inset; }
+  .ans .pick{ width:24px; height:24px; }
+  .ans:hover .pick .bean-out, .ans.on .pick .bean-out{ display:none; }
+  .ans:hover .pick .bean-fill, .ans.on .pick .bean-fill{ display:block; }
+  .ans-t{ color:var(--ink); font-size:13px; line-height:1.3; }
+
+  .next{ width:100%; background:transparent; color:var(--espresso); border:1.6px solid var(--copper); border-radius:14px; font-family:'Jost'; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px; font-weight:500; padding:15px; font-size:11.5px;
+    letter-spacing:.2em; text-transform:uppercase; transition:border-color .3s ease, transform .14s ease; }
+  .next:hover{ border-color:var(--charcoal); }
+  .next:active{ transform:scale(.985); }
+  .next i{ color:var(--copper); transition:transform .25s ease; }
+  .next:hover i{ transform:translateX(3px); }
+
+  /* brew transition overlay */
+  .brew{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+         opacity:0; visibility:hidden; z-index:30; border-radius:18px; overflow:hidden; }
+  .brew.go{ opacity:1; visibility:visible; }
+  .brew.out{ opacity:0; transition:opacity .55s ease; }
+  .crema{ position:absolute; left:0; right:0; bottom:0; height:0; background:linear-gradient(180deg,#C57A45 0%,#9A5128 55%,#5E3115 100%); transition:height .7s cubic-bezier(.4,0,.2,1); }
+  .brew.go .crema{ height:100%; }
+  .brew-inner{ position:relative; z-index:2; text-align:center; transform:scale(.7); opacity:0; transition:transform .4s ease, opacity .4s ease; }
+  .brew.go .brew-inner{ transform:scale(1); opacity:1; transition-delay:.18s; }
+  .brew-cup .st{ opacity:0; transform-origin:center; }
+  .brew.go .brew-cup .s1{ animation:rise 1.5s ease-in-out infinite; }
+  .brew.go .brew-cup .s2{ animation:rise 1.5s ease-in-out .4s infinite; }
+  .brew-label{ font-family:'Cormorant Garamond',serif; font-style:italic; color:#F4E4C8; font-size:16px; margin-top:8px; }
+
+  /* ===== page 3 ===== */
+  .celebrate{ text-align:center; margin-bottom:22px; }
+  .medal{ width:54px; height:54px; border-radius:50%; border:1px solid var(--copper); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; position:relative; }
+  .medal:before{ content:""; position:absolute; inset:-5px; border-radius:50%; border:1px solid var(--line); }
+  .medal i{ color:var(--copper); font-size:24px; }
+  .cel-k{ font-size:9px; letter-spacing:.3em; text-transform:uppercase; color:var(--muted); margin:0 0 6px; }
+  .cel-t{ font-family:'Cormorant Garamond',serif; color:var(--pine); font-weight:500; font-size:26px; line-height:1.12; margin:0; }
+  .cel-t em{ font-style:italic; color:var(--copper); }
+
+  .sect-card{ border:1px solid var(--line); border-radius:16px; background:#FCF9F2; padding:18px 20px; margin-bottom:18px; }
+  .sect-h{ display:flex; align-items:center; gap:7px; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--copper); margin:0 0 9px; }
+  .summary-text{ font-family:'Cormorant Garamond',serif; color:var(--ink); line-height:1.65; font-size:15px; margin:0; }
+
+  .sugg-label{ display:flex; align-items:center; gap:7px; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--copper); margin:0 0 11px; }
+  .suggs{ display:flex; flex-direction:column; gap:11px; margin-bottom:18px; }
+  .cprof{ border:1px solid var(--line); border-radius:16px; background:#FCF9F2; position:relative; display:flex; gap:13px; padding:16px; }
+  .cprof.best{ border-color:var(--copper); box-shadow:0 0 0 1px var(--copper) inset; }
+  .cprof-seal{ width:42px; height:42px; border-radius:50%; background:var(--pine); display:flex; align-items:center; justify-content:center; flex:0 0 auto; align-self:flex-start; }
+  .cprof-seal i{ color:var(--copper-lt); font-size:20px; }
+  .cprof-name{ font-family:'Cormorant Garamond',serif; color:var(--pine); font-weight:600; line-height:1.1; margin:0; font-size:18px; }
+  .cprof-origin{ font-size:11px; letter-spacing:.04em; color:var(--muted); margin:2px 0 0; }
+  .cprof-attrs{ display:flex; flex-wrap:wrap; gap:6px; margin:9px 0; }
+  .ca{ display:inline-flex; align-items:center; gap:4px; border:1px solid var(--line); border-radius:99px; background:#fff; color:var(--ink); padding:4px 9px; font-size:10px; }
+  .ca .ca-k{ color:var(--muted); }
+  .cprof-why{ font-family:'Cormorant Garamond',serif; font-style:italic; color:var(--ink); line-height:1.5; margin:0; font-size:13px; }
+  .best-badge{ position:absolute; top:0; right:0; background:var(--copper); color:#fff; letter-spacing:.16em; text-transform:uppercase; border-radius:0 16px 0 12px; padding:4px 11px; font-size:8.5px; }
+  .rank{ position:absolute; top:0; right:0; font-family:'Cormorant Garamond',serif; color:var(--line); font-weight:600; font-size:26px; padding:6px 14px; }
+
+  .details{ border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:18px; }
+  .det-head{ display:flex; align-items:center; justify-content:space-between; cursor:pointer; background:#FCF9F2; padding:15px 18px; }
+  .det-title{ display:flex; align-items:center; gap:7px; font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--pine); }
+  .det-title i{ color:var(--copper); font-size:13px; }
+  .det-chev{ color:var(--muted); font-size:15px; transition:transform .3s ease; }
+  .details.open .det-chev{ transform:rotate(180deg); }
+  .det-body{ max-height:0; overflow:hidden; transition:max-height .4s ease; }
+  .details.open .det-body{ max-height:320px; }
+  .det-body-inner{ padding:4px 18px 18px; display:flex; flex-direction:column; gap:10px; }
+  .dim-row{ display:flex; align-items:center; gap:10px; }
+  .dim-k{ font-family:'Cormorant Garamond',serif; color:var(--ink); flex:0 0 120px; font-size:13px; }
+  .dim-track{ flex:1; height:4px; background:var(--line); border-radius:99px; }
+  .dim-fill{ height:4px; border-radius:99px; background:var(--copper); }
+  .dim-v{ color:var(--muted); flex:0 0 26px; text-align:right; font-size:10px; }
+
+  .restart{ width:100%; background:transparent; color:var(--espresso); border:1.6px solid var(--copper); border-radius:14px; font-family:'Jost'; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:9px; font-weight:500; padding:15px; font-size:11px; letter-spacing:.2em; text-transform:uppercase; transition:border-color .3s ease, transform .14s ease; }
+  .restart:hover{ border-color:var(--charcoal); }
+  .restart:active{ transform:scale(.985); }
+  .restart i{ color:var(--copper); font-size:14px; }
+
+  .foot{ text-align:center; padding:10px 16px 4px; }
+  .foot span{ font-size:8.5px; letter-spacing:.26em; text-transform:uppercase; color:#BBB29B; }
+
+  /* ===== responsive ===== */
+  @media (max-width:760px){
+    .nav{ padding:16px 18px; }
+    .wm-text{ font-size:18px; }
+    .app{ padding:6px 16px 50px; }
+    .p1{ grid-template-columns:1fr; gap:16px; }
+    .hero{ padding:30px 24px; border-radius:20px; }
+    .hero-title{ font-size:31px; }
+    .formcard{ padding:24px 20px; border-radius:20px; }
+    .sc-q{ font-size:19px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- shared bean + mug symbols -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="bean-out" viewBox="0 0 24 24"><g transform="rotate(36 12 12)"><ellipse cx="12" cy="12" rx="6" ry="9" fill="none" stroke="#C2B196" stroke-width="1.4"/><path d="M12 4 C 8.5 8.5, 15.5 15.5, 12 20" stroke="#C2B196" stroke-width="1.4" fill="none" stroke-linecap="round"/></g></symbol>
+    <symbol id="bean-fill" viewBox="0 0 24 24"><g transform="rotate(36 12 12)"><ellipse cx="12" cy="12" rx="6" ry="9" fill="#B5683C"/><path d="M12 4 C 8.5 8.5, 15.5 15.5, 12 20" stroke="#FBF8F1" stroke-width="1.4" fill="none" stroke-linecap="round"/></g></symbol>
+  </svg>
+
+  <header class="nav">
+    <div class="wordmark"><div class="seal"><i class="ti ti-coffee"></i></div><span class="wm-text">Intelli<b>Bean</b></span></div>
+    <button class="profile-link"><span class="profile-av"><i class="ti ti-user"></i></span><span class="profile-txt">My Profile</span></button>
+  </header>
+
+  <main class="app">
+
+    <!-- ============ PAGE 1 — SETUP ============ -->
+    <section class="screen active" id="screen1">
+      <div class="p1">
+        <div class="hero">
+          <p class="hero-est">Coffee Finder · No. 001</p>
+          <h1 class="hero-title">Discover your<br><em>perfect coffee match</em></h1>
+          <div class="hero-rule"></div>
+          <p class="hero-sub">A personalized survey, guided by intelligence. Tell us the moment and we'll compose a coffee profile entirely for you.</p>
+        </div>
+        <div class="formcard">
+          <label class="field-label">Email address</label>
+          <input class="text-input" type="email" placeholder="you@example.com" />
+          <label class="field-label">What brings you here today?</label>
+          <div class="opts" id="setupOpts"></div>
+          <button class="brewbtn" id="startBtn">
+            <span class="lbl">Let's Get<br>Brewing</span>
+            <svg class="bmug" viewBox="0 0 28 24" width="80" height="80" aria-hidden="true">
+              <defs><clipPath id="cBtn"><rect x="6" y="7" width="11" height="11.4" rx="2.1"/></clipPath>
+              <linearGradient id="gBtn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ECD3AF"/><stop offset="0.2" stop-color="#C57A45"/><stop offset="1" stop-color="#9A5128"/></linearGradient></defs>
+              <g class="st s1"><path d="M9 5 q1.5 -1.7 0 -3.4" fill="none" stroke="#B5683C" stroke-width="1.1" stroke-linecap="round"/></g>
+              <g class="st s2"><path d="M13 5 q1.5 -1.7 0 -3.4" fill="none" stroke="#B5683C" stroke-width="1.1" stroke-linecap="round"/></g>
+              <rect class="mug-liquid" x="5" y="19" width="13" height="13" fill="url(#gBtn)" clip-path="url(#cBtn)"/>
+              <rect x="5.3" y="6.3" width="12.4" height="12.9" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M18 9.4 a3.5 3.5 0 0 1 0 6.4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="foot"><span>Crafted bean by bean</span></div>
+    </section>
+
+    <!-- ============ PAGE 2 — INTERVIEW ============ -->
+    <section class="screen" id="screen2">
+      <div class="center-col">
+        <div class="prog-top"><span class="prog-step">Question <b id="qnum">one</b></span><span class="prog-pct" id="qpct">20% complete</span></div>
+        <div class="prog-track"><div class="prog-fill" id="qfill" style="width:20%"></div></div>
+
+        <div class="scenario">
+          <span class="sc-tag"><i class="ti ti-sparkles"></i> Scenario</span>
+          <p class="sc-q" id="qtext"></p>
+        </div>
+
+        <div class="answers" id="answers"></div>
+
+        <button class="next" id="nextBtn"><span class="lbl">Next question</span> <i class="ti ti-arrow-right"></i></button>
+
+        <div class="brew" id="brew">
+          <div class="crema"></div>
+          <div class="brew-inner">
+            <svg class="brew-cup" viewBox="0 0 28 24" width="66" height="66" aria-hidden="true">
+              <g class="st s1"><path d="M9 5 q1.6 -1.8 0 -3.6" fill="none" stroke="#F4E4C8" stroke-width="1.2" stroke-linecap="round"/></g>
+              <g class="st s2"><path d="M13 5 q1.6 -1.8 0 -3.6" fill="none" stroke="#F4E4C8" stroke-width="1.2" stroke-linecap="round"/></g>
+              <rect x="5.3" y="6.3" width="12.4" height="12.9" rx="2.5" fill="none" stroke="#F4E4C8" stroke-width="1.6"/>
+              <path d="M18 9.4 a3.5 3.5 0 0 1 0 6.4" fill="none" stroke="#F4E4C8" stroke-width="1.6"/>
+            </svg>
+            <div class="brew-label" id="brewLabel">Brewing your next question…</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PAGE 3 — RESULT ============ -->
+    <section class="screen" id="screen3">
+      <div class="center-col">
+        <div class="celebrate">
+          <div class="medal"><i class="ti ti-award"></i></div>
+          <p class="cel-k">Interview complete</p>
+          <p class="cel-t">Here is your <em>IntelliBean profile</em></p>
+        </div>
+
+        <div class="sect-card">
+          <p class="sect-h"><i class="ti ti-user-heart"></i> Personality summary</p>
+          <p class="summary-text">You treat coffee as a daily ceremony — slow, intentional, and grounding. You favor depth of flavor over convenience and find calm in the quiet craft of the morning.</p>
+        </div>
+
+        <p class="sugg-label"><i class="ti ti-coffee"></i> Your three coffee suggestions</p>
+        <div class="suggs">
+          <div class="cprof best">
+            <span class="best-badge">Best match</span>
+            <div class="cprof-seal"><i class="ti ti-coffee"></i></div>
+            <div>
+              <p class="cprof-name">Ethiopian Yirgacheffe</p>
+              <p class="cprof-origin">Gedeo Zone, Ethiopia</p>
+              <div class="cprof-attrs"><span class="ca"><span class="ca-k">Roast</span> Light</span><span class="ca"><span class="ca-k">Brew</span> Pour-over</span></div>
+              <p class="cprof-why">Floral and patient — its complexity unfolds slowly, made for a morning ritual.</p>
+            </div>
+          </div>
+          <div class="cprof">
+            <span class="rank">02</span>
+            <div class="cprof-seal"><i class="ti ti-coffee"></i></div>
+            <div>
+              <p class="cprof-name">Kenya AA Nyeri</p>
+              <p class="cprof-origin">Nyeri, Kenya</p>
+              <div class="cprof-attrs"><span class="ca"><span class="ca-k">Roast</span> Medium-light</span><span class="ca"><span class="ca-k">Brew</span> Chemex</span></div>
+              <p class="cprof-why">Bright and structured for when you want a little more backbone.</p>
+            </div>
+          </div>
+          <div class="cprof">
+            <span class="rank">03</span>
+            <div class="cprof-seal"><i class="ti ti-coffee"></i></div>
+            <div>
+              <p class="cprof-name">Guatemala Antigua</p>
+              <p class="cprof-origin">Antigua, Guatemala</p>
+              <div class="cprof-attrs"><span class="ca"><span class="ca-k">Roast</span> Medium</span><span class="ca"><span class="ca-k">Brew</span> French press</span></div>
+              <p class="cprof-why">Cocoa-rich and comforting for slower, indulgent afternoons.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="details" id="details">
+          <div class="det-head" id="detHead">
+            <span class="det-title"><i class="ti ti-chart-bar"></i> Detailed personality dimensions</span>
+            <i class="ti ti-chevron-down det-chev"></i>
+          </div>
+          <div class="det-body"><div class="det-body-inner">
+            <div class="dim-row"><span class="dim-k">Taste complexity</span><div class="dim-track"><div class="dim-fill" style="width:85%"></div></div><span class="dim-v">85</span></div>
+            <div class="dim-row"><span class="dim-k">Ritual importance</span><div class="dim-track"><div class="dim-fill" style="width:92%"></div></div><span class="dim-v">92</span></div>
+            <div class="dim-row"><span class="dim-k">Energy seeking</span><div class="dim-track"><div class="dim-fill" style="width:40%"></div></div><span class="dim-v">40</span></div>
+            <div class="dim-row"><span class="dim-k">Adventure level</span><div class="dim-track"><div class="dim-fill" style="width:68%"></div></div><span class="dim-v">68</span></div>
+          </div></div>
+        </div>
+
+        <button class="restart" id="restartBtn"><i class="ti ti-refresh"></i> Start New Interview</button>
+        <div class="foot"><span>Reserve · No. 001</span></div>
+      </div>
+    </section>
+
+  </main>
+
+<script>
+  // ---------- demo data (front-end only, no backend) ----------
+  var SETUP_OPTIONS = [
+    { ic:"ti-sunrise",  t:"Morning Routine",   d:"Start your day right" },
+    { ic:"ti-briefcase",t:"Work Break",        d:"Midday pick-me-up" },
+    { ic:"ti-sunset",   t:"Afternoon Treat",   d:"Afternoon delight" },
+    { ic:"ti-moon",     t:"Evening Wind Down", d:"Relax and unwind" },
+    { ic:"ti-users",    t:"Social Gathering",  d:"Coffee with friends" }
+  ];
+
+  var QUESTIONS = [
+    { q:"It's 7am on a Monday before a demanding day. Your ideal coffee moment looks like…",
+      o:["Quiet at home, made slowly and with intention","Out the door — grabbed fast, no ceremony","At a café, savoring the atmosphere","Unplanned — someone made it for me"] },
+    { q:"You walk into a café you've never tried. What do you order?",
+      o:["A classic you already trust","Whatever the barista recommends","The most unusual thing on the menu","A simple black coffee"] },
+    { q:"The mid-afternoon slump arrives. How do you answer it?",
+      o:["A sharp espresso, no fuss","A slow pour-over ritual","Something sweet and milky","Skip it and push through"] },
+    { q:"A friend asks how you take your coffee. You say…",
+      o:["However the mood strikes that day","The same way, every single time","Whatever's most interesting","Strong — that's all that matters"] },
+    { q:"Your weekend morning is wide open. The coffee plan is…",
+      o:["A slow, deliberate brewing ritual","A quick cup, then out the door","A café crawl with a friend","Whatever's easiest — no plan"] }
+  ];
+  var NUMS = ["one","two","three","four","five"];
+
+  // ---------- helpers ----------
+  function beanSpan(){
+    return '<span class="pick"><svg class="bean-out" width="22" height="22"><use href="#bean-out"/></svg>'
+         + '<svg class="bean-fill" width="22" height="22"><use href="#bean-fill"/></svg></span>';
+  }
+  function show(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+  function ripple(btn, e){
+    var rect = btn.getBoundingClientRect();
+    var size = Math.max(rect.width, rect.height);
+    var d = document.createElement('span');
+    d.className = 'drop';
+    d.style.width = d.style.height = size + 'px';
+    d.style.left = (e.clientX - rect.left - size/2) + 'px';
+    d.style.top  = (e.clientY - rect.top  - size/2) + 'px';
+    btn.appendChild(d);
+    setTimeout(function(){ d.remove(); }, 600);
+  }
+
+  // ---------- page 1 ----------
+  var setupOpts = document.getElementById('setupOpts');
+  setupOpts.innerHTML = SETUP_OPTIONS.map(function(o, i){
+    return '<div class="opt'+(i===0?' on':'')+'">' + beanSpan()
+         + '<div class="opt-ic"><i class="ti '+o.ic+'"></i></div>'
+         + '<div><p class="opt-t">'+o.t+'</p><p class="opt-d">'+o.d+'</p></div></div>';
+  }).join('');
+  setupOpts.querySelectorAll('.opt').forEach(function(el){
+    el.addEventListener('click', function(){
+      setupOpts.querySelectorAll('.opt').forEach(function(x){ x.classList.remove('on'); });
+      el.classList.add('on');
+    });
+  });
+
+  var startBtn = document.getElementById('startBtn');
+  startBtn.addEventListener('click', function(e){
+    ripple(startBtn, e);
+    idx = 0; renderQ();
+    setTimeout(function(){ show('screen2'); }, 220);
+  });
+
+  // ---------- page 2 ----------
+  var idx = 0;
+  var answersEl = document.getElementById('answers');
+  var qtext = document.getElementById('qtext');
+  var qnum  = document.getElementById('qnum');
+  var qpct  = document.getElementById('qpct');
+  var qfill = document.getElementById('qfill');
+  var brew  = document.getElementById('brew');
+  var brewLabel = document.getElementById('brewLabel');
+  var nextBtn = document.getElementById('nextBtn');
+
+  function renderQ(){
+    var q = QUESTIONS[idx];
+    var pct = Math.round(((idx+1) / QUESTIONS.length) * 100);
+    qtext.textContent = q.q;
+    qnum.textContent = NUMS[idx];
+    qpct.textContent = pct + "% complete";
+    qfill.style.width = pct + "%";
+    answersEl.innerHTML = q.o.map(function(t){
+      return '<div class="ans">' + beanSpan() + '<span class="ans-t">'+t+'</span></div>';
+    }).join('');
+    answersEl.querySelectorAll('.ans').forEach(function(a){
+      a.addEventListener('click', function(){
+        answersEl.querySelectorAll('.ans').forEach(function(x){ x.classList.remove('on'); });
+        a.classList.add('on');
+      });
+    });
+  }
+
+  nextBtn.addEventListener('click', function(){
+    var last = (idx === QUESTIONS.length - 1);
+    brewLabel.textContent = last ? "Composing your profile…" : "Brewing your next question…";
+    brew.classList.add('go');
+    setTimeout(function(){
+      if(last){ show('screen3'); }
+      else { idx++; renderQ(); }
+    }, 850);
+    setTimeout(function(){ brew.classList.add('out'); }, 1250);
+    setTimeout(function(){ brew.classList.remove('go','out'); }, 1850);
+  });
+
+  // ---------- page 3 ----------
+  document.getElementById('detHead').addEventListener('click', function(){
+    document.getElementById('details').classList.toggle('open');
+  });
+  document.getElementById('restartBtn').addEventListener('click', function(){
+    document.getElementById('details').classList.remove('open');
+    show('screen1');
+  });
+
+  // init
+  renderQ();
+</script>
+</body>
+</html>
