@@ -200,6 +200,30 @@
     .formcard{ padding:24px 20px; border-radius:20px; }
     .sc-q{ font-size:19px; }
   }
+
+  /* desktop: fit the setup page within the viewport, no scrolling */
+  @media (min-width:761px){
+    body{ overflow-x:hidden; }
+    .app{ padding-top:0; padding-bottom:0; }
+    #screen1.active{ display:flex; flex-direction:column; min-height:calc(100vh - 74px); }
+    #screen1 .p1{ margin:auto; width:100%; }
+    #screen1 .foot{ margin-top:auto; padding:12px 16px 16px; }
+
+    .hero{ padding:34px 30px; }
+    .hero-est{ margin:0 0 12px; }
+    .hero-title{ font-size:36px; margin:0 0 10px; }
+    .hero-rule{ margin:13px 0; }
+    .hero-sub{ font-size:12.5px; line-height:1.7; }
+
+    .formcard{ padding:24px 28px; }
+    .text-input{ margin-bottom:16px; padding:9px 2px; }
+    .opts{ gap:8px; margin:6px 0 16px; }
+    .opt{ padding:10px 14px; }
+    .opt-ic{ width:32px; height:32px; }
+    .opt-ic i{ font-size:15px; }
+    .brewbtn{ padding:12px 20px; }
+    .bmug{ width:72px; height:72px; }
+  }
 </style>
 </head>
 <body>
